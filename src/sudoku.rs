@@ -7,7 +7,8 @@ pub type Solution = Grid;
 
 const DIGITS_ARRAY: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const INDICES_ARRAY: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-const BLANKS_TO_GENERATE: usize = 35;
+const TARGET_BLANKS_TO_GENERATE: usize = 35;
+const MAX_BLANKS_TO_GENERATE: usize = 64;
 
 /// (row, col)
 type GridPos = (usize, usize);
@@ -45,7 +46,10 @@ pub fn solve_any(puzzle: Puzzle) -> Option<Solution> {
 /// Generates a puzzle with an unique solution. The puzzle will be generally considered as
 /// easy-to-medium difficulty.
 pub fn generate() -> Puzzle {
-    let puzzle = create_random_blank_positions(create_random_solution(), BLANKS_TO_GENERATE);
+    let solution = create_random_solution();
+
+    let puzzle =
+        create_random_blank_positions(solution, TARGET_BLANKS_TO_GENERATE).unwrap_or(solution);
     let puzzle = create_random_blank_row(puzzle).unwrap_or(puzzle);
     create_random_blank_col(puzzle).unwrap_or(puzzle)
 }
@@ -395,11 +399,11 @@ fn create_random_solution() -> Solution {
     }
 }
 
-/// Creates random blanks in the given [Puzzle]. Ensures that the resultant [Puzzle] retains its
-/// unique [Solution].
-fn create_random_blank_positions(puzzle: Puzzle, count: usize) -> Puzzle {
-    if !(1..=64).contains(&count) {
-        panic!("Invalid count: {count}");
+/// Creates up to count random blanks in the given [Puzzle]. Ensures that the resultant [Puzzle]
+/// retains its unique [Solution].
+fn create_random_blank_positions(puzzle: Puzzle, count: usize) -> Option<Puzzle> {
+    if !(1..=MAX_BLANKS_TO_GENERATE).contains(&count) {
+        return None;
     }
 
     let mut positions: Vec<GridPos> = (0..9)
@@ -425,7 +429,7 @@ fn create_random_blank_positions(puzzle: Puzzle, count: usize) -> Puzzle {
         }
     }
 
-    puzzle
+    Some(puzzle)
 }
 
 /// Creates a randomly chosen blank row in the given [Puzzle]. Ensures that the resultant [Puzzle]
@@ -666,10 +670,15 @@ mod tests {
             0
         );
 
-        let puzzle = create_random_blank_positions(solution, BLANKS_TO_GENERATE);
-        assert_eq!(
-            puzzle.iter().flatten().filter(|&digit| *digit == 0).count(),
-            BLANKS_TO_GENERATE
-        );
+        // TARGET_BLANKS_TO_GENERATE should never fail.
+        let puzzle = create_random_blank_positions(solution, TARGET_BLANKS_TO_GENERATE);
+        assert!(puzzle.is_some());
+
+        if let Some(puzzle) = puzzle {
+            assert_eq!(
+                puzzle.iter().flatten().filter(|&digit| *digit == 0).count(),
+                TARGET_BLANKS_TO_GENERATE
+            );
+        }
     }
 }
