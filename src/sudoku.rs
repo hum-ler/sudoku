@@ -7,9 +7,12 @@ pub type Grid = [[u8; 9]; 9];
 pub type Puzzle = Grid;
 pub type Solution = Grid;
 
-const DIGITS: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-const INDICES: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const DIGITS_ARRAY: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const INDICES_ARRAY: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const BLANKS_TO_GENERATE: usize = 35;
+
+/// (row, col)
+type GridPos = (usize, usize);
 
 /// Finds all solutions to the given puzzle, if any.
 pub fn solve(puzzle: Puzzle) -> Vec<Solution> {
@@ -23,7 +26,7 @@ pub fn solve(puzzle: Puzzle) -> Vec<Solution> {
     }
 
     let mut solutions = Vec::new();
-    find_solutions(puzzle, 0, &blanks, &DIGITS, &mut solutions);
+    find_solutions(puzzle, 0, &blanks, &DIGITS_ARRAY, &mut solutions);
     solutions
 }
 
@@ -38,7 +41,7 @@ pub fn solve_any(puzzle: Puzzle) -> Option<Solution> {
         return Some(puzzle);
     }
 
-    find_solution(puzzle, 0, &blanks, &DIGITS)
+    find_solution(puzzle, 0, &blanks, &DIGITS_ARRAY)
 }
 
 /// Generates a puzzle with an unique solution. The puzzle will be generally considered as
@@ -61,7 +64,7 @@ fn has_unique_solution(puzzle: Puzzle) -> bool {
     }
 
     let mut count_cache = 0;
-    count_solutions(puzzle, 0, &blanks, &DIGITS, &mut count_cache);
+    count_solutions(puzzle, 0, &blanks, &DIGITS_ARRAY, &mut count_cache);
     count_cache == 1
 }
 
@@ -93,9 +96,6 @@ fn slice_has_unique_digits(slice: [u8; 9]) -> bool {
 
     true
 }
-
-/// (row, col)
-type GridPos = (usize, usize);
 
 /// Finds all the blank positions in a [Puzzle] that need to be filled in to form a [Solution].
 fn blanks(puzzle: Puzzle) -> Vec<GridPos> {
@@ -367,7 +367,7 @@ fn count_solutions(
 
 /// Creates a random [Solution].
 fn create_random_solution() -> Solution {
-    let mut digits = DIGITS;
+    let mut digits = DIGITS_ARRAY;
     fastrand::shuffle(&mut digits);
 
     // Search for a solution for an empty puzzle, but we jumble up the digits to fill.
@@ -422,7 +422,7 @@ fn create_random_blank_positions(puzzle: Puzzle, count: usize) -> Puzzle {
 ///
 /// Returns None if every row fails to retain the unique [Solution] after blanking.
 fn create_random_blank_row(puzzle: Puzzle) -> Option<Puzzle> {
-    let mut rows = INDICES;
+    let mut rows = INDICES_ARRAY;
     fastrand::shuffle(&mut rows);
 
     for row in rows {
@@ -444,7 +444,7 @@ fn create_random_blank_row(puzzle: Puzzle) -> Option<Puzzle> {
 ///
 /// Returns None if every row fails to retain the unique [Solution] after blanking.
 fn create_random_blank_col(puzzle: Puzzle) -> Option<Puzzle> {
-    let mut cols = INDICES;
+    let mut cols = INDICES_ARRAY;
     fastrand::shuffle(&mut cols);
 
     for col in cols {
