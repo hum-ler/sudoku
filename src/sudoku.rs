@@ -69,9 +69,19 @@ fn has_unique_solution(puzzle: Puzzle) -> bool {
 /// Verifies whether a puzzle is valid -- all digits are in legal positions.
 fn is_valid_puzzle(puzzle: &Puzzle) -> bool {
     (0..9).all(|index| {
-        slice_has_unique_digits(horizontal_slice(puzzle, index))
-            && slice_has_unique_digits(vertical_slice(puzzle, index))
-            && slice_has_unique_digits(square_slice(puzzle, index))
+        let Some(horizontal_slice) = horizontal_slice(puzzle, index) else {
+            return false;
+        };
+        let Some(vertical_slice) = vertical_slice(puzzle, index) else {
+            return false;
+        };
+        let Some(square_slice) = square_slice(puzzle, index) else {
+            return false;
+        };
+
+        slice_has_unique_digits(horizontal_slice)
+            && slice_has_unique_digits(vertical_slice)
+            && slice_has_unique_digits(square_slice)
     })
 }
 
@@ -111,21 +121,21 @@ fn blanks(puzzle: Puzzle) -> Vec<GridPos> {
 }
 
 /// Gets a view of a row in a [Puzzle].
-fn horizontal_slice(puzzle: &Puzzle, row: usize) -> impl Iterator<Item = &u8> {
+fn horizontal_slice(puzzle: &Puzzle, row: usize) -> Option<impl Iterator<Item = &u8>> {
     if !(0..9).contains(&row) {
-        panic!("Invalid row index: {row}");
+        return None;
     }
 
-    puzzle[row].iter()
+    Some(puzzle[row].iter())
 }
 
 /// Gets a view of a col in a [Puzzle].
-fn vertical_slice(puzzle: &Puzzle, col: usize) -> impl Iterator<Item = &u8> {
+fn vertical_slice(puzzle: &Puzzle, col: usize) -> Option<impl Iterator<Item = &u8>> {
     if !(0..9).contains(&col) {
-        panic!("Invalid col index: {col}");
+        return None;
     }
 
-    (0..9).map(move |row| &puzzle[row][col])
+    Some((0..9).map(move |row| &puzzle[row][col]))
 }
 
 /// Gets a view of a square in a [Puzzle].
@@ -150,110 +160,112 @@ fn vertical_slice(puzzle: &Puzzle, col: usize) -> impl Iterator<Item = &u8> {
 /// |678|
 /// +---+
 /// ```
-fn square_slice(puzzle: &Puzzle, square: usize) -> impl Iterator<Item = &u8> {
-    match square {
-        0 => [
-            &puzzle[0][0],
-            &puzzle[0][1],
-            &puzzle[0][2],
-            &puzzle[1][0],
-            &puzzle[1][1],
-            &puzzle[1][2],
-            &puzzle[2][0],
-            &puzzle[2][1],
-            &puzzle[2][2],
-        ],
-        1 => [
-            &puzzle[0][3],
-            &puzzle[0][4],
-            &puzzle[0][5],
-            &puzzle[1][3],
-            &puzzle[1][4],
-            &puzzle[1][5],
-            &puzzle[2][3],
-            &puzzle[2][4],
-            &puzzle[2][5],
-        ],
-        2 => [
-            &puzzle[0][6],
-            &puzzle[0][7],
-            &puzzle[0][8],
-            &puzzle[1][6],
-            &puzzle[1][7],
-            &puzzle[1][8],
-            &puzzle[2][6],
-            &puzzle[2][7],
-            &puzzle[2][8],
-        ],
-        3 => [
-            &puzzle[3][0],
-            &puzzle[3][1],
-            &puzzle[3][2],
-            &puzzle[4][0],
-            &puzzle[4][1],
-            &puzzle[4][2],
-            &puzzle[5][0],
-            &puzzle[5][1],
-            &puzzle[5][2],
-        ],
-        4 => [
-            &puzzle[3][3],
-            &puzzle[3][4],
-            &puzzle[3][5],
-            &puzzle[4][3],
-            &puzzle[4][4],
-            &puzzle[4][5],
-            &puzzle[5][3],
-            &puzzle[5][4],
-            &puzzle[5][5],
-        ],
-        5 => [
-            &puzzle[3][6],
-            &puzzle[3][7],
-            &puzzle[3][8],
-            &puzzle[4][6],
-            &puzzle[4][7],
-            &puzzle[4][8],
-            &puzzle[5][6],
-            &puzzle[5][7],
-            &puzzle[5][8],
-        ],
-        6 => [
-            &puzzle[6][0],
-            &puzzle[6][1],
-            &puzzle[6][2],
-            &puzzle[7][0],
-            &puzzle[7][1],
-            &puzzle[7][2],
-            &puzzle[8][0],
-            &puzzle[8][1],
-            &puzzle[8][2],
-        ],
-        7 => [
-            &puzzle[6][3],
-            &puzzle[6][4],
-            &puzzle[6][5],
-            &puzzle[7][3],
-            &puzzle[7][4],
-            &puzzle[7][5],
-            &puzzle[8][3],
-            &puzzle[8][4],
-            &puzzle[8][5],
-        ],
-        8 => [
-            &puzzle[6][6],
-            &puzzle[6][7],
-            &puzzle[6][8],
-            &puzzle[7][6],
-            &puzzle[7][7],
-            &puzzle[7][8],
-            &puzzle[8][6],
-            &puzzle[8][7],
-            &puzzle[8][8],
-        ],
-        _ => panic!("Invalid square index: {square}"),
-    }
-    .into_iter()
+fn square_slice(puzzle: &Puzzle, square: usize) -> Option<impl Iterator<Item = &u8>> {
+    Some(
+        match square {
+            0 => [
+                &puzzle[0][0],
+                &puzzle[0][1],
+                &puzzle[0][2],
+                &puzzle[1][0],
+                &puzzle[1][1],
+                &puzzle[1][2],
+                &puzzle[2][0],
+                &puzzle[2][1],
+                &puzzle[2][2],
+            ],
+            1 => [
+                &puzzle[0][3],
+                &puzzle[0][4],
+                &puzzle[0][5],
+                &puzzle[1][3],
+                &puzzle[1][4],
+                &puzzle[1][5],
+                &puzzle[2][3],
+                &puzzle[2][4],
+                &puzzle[2][5],
+            ],
+            2 => [
+                &puzzle[0][6],
+                &puzzle[0][7],
+                &puzzle[0][8],
+                &puzzle[1][6],
+                &puzzle[1][7],
+                &puzzle[1][8],
+                &puzzle[2][6],
+                &puzzle[2][7],
+                &puzzle[2][8],
+            ],
+            3 => [
+                &puzzle[3][0],
+                &puzzle[3][1],
+                &puzzle[3][2],
+                &puzzle[4][0],
+                &puzzle[4][1],
+                &puzzle[4][2],
+                &puzzle[5][0],
+                &puzzle[5][1],
+                &puzzle[5][2],
+            ],
+            4 => [
+                &puzzle[3][3],
+                &puzzle[3][4],
+                &puzzle[3][5],
+                &puzzle[4][3],
+                &puzzle[4][4],
+                &puzzle[4][5],
+                &puzzle[5][3],
+                &puzzle[5][4],
+                &puzzle[5][5],
+            ],
+            5 => [
+                &puzzle[3][6],
+                &puzzle[3][7],
+                &puzzle[3][8],
+                &puzzle[4][6],
+                &puzzle[4][7],
+                &puzzle[4][8],
+                &puzzle[5][6],
+                &puzzle[5][7],
+                &puzzle[5][8],
+            ],
+            6 => [
+                &puzzle[6][0],
+                &puzzle[6][1],
+                &puzzle[6][2],
+                &puzzle[7][0],
+                &puzzle[7][1],
+                &puzzle[7][2],
+                &puzzle[8][0],
+                &puzzle[8][1],
+                &puzzle[8][2],
+            ],
+            7 => [
+                &puzzle[6][3],
+                &puzzle[6][4],
+                &puzzle[6][5],
+                &puzzle[7][3],
+                &puzzle[7][4],
+                &puzzle[7][5],
+                &puzzle[8][3],
+                &puzzle[8][4],
+                &puzzle[8][5],
+            ],
+            8 => [
+                &puzzle[6][6],
+                &puzzle[6][7],
+                &puzzle[6][8],
+                &puzzle[7][6],
+                &puzzle[7][7],
+                &puzzle[7][8],
+                &puzzle[8][6],
+                &puzzle[8][7],
+                &puzzle[8][8],
+            ],
+            _ => return None,
+        }
+        .into_iter(),
+    )
 }
 
 /// Finds a [Solution] to a [Puzzle] by backtracking.
@@ -490,179 +502,134 @@ mod tests {
     #[test]
     fn check_horizontal_slice() {
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 0)
-                .copied()
-                .collect::<Vec<_>>(),
-            [0, 0, 0, 1, 1, 1, 2, 2, 2]
+            horizontal_slice(&SLICE_TEST_1, 0).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![0, 0, 0, 1, 1, 1, 2, 2, 2])
         );
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 4)
-                .copied()
-                .collect::<Vec<_>>(),
-            [3, 3, 3, 4, 4, 4, 5, 5, 5]
+            horizontal_slice(&SLICE_TEST_1, 4).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![3, 3, 3, 4, 4, 4, 5, 5, 5])
         );
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 8)
-                .copied()
-                .collect::<Vec<_>>(),
-            [6, 6, 6, 7, 7, 7, 8, 8, 8]
+            horizontal_slice(&SLICE_TEST_1, 8).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![6, 6, 6, 7, 7, 7, 8, 8, 8])
         );
 
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 1)
-                .copied()
-                .collect::<Vec<_>>(),
-            horizontal_slice(&SLICE_TEST_1, 2)
-                .copied()
-                .collect::<Vec<_>>()
+            horizontal_slice(&SLICE_TEST_1, 1).map(|iter| iter.copied().collect::<Vec<_>>()),
+            horizontal_slice(&SLICE_TEST_1, 2).map(|iter| iter.copied().collect::<Vec<_>>())
         );
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 3)
-                .copied()
-                .collect::<Vec<_>>(),
-            horizontal_slice(&SLICE_TEST_1, 5)
-                .copied()
-                .collect::<Vec<_>>()
+            horizontal_slice(&SLICE_TEST_1, 3).map(|iter| iter.copied().collect::<Vec<_>>()),
+            horizontal_slice(&SLICE_TEST_1, 5).map(|iter| iter.copied().collect::<Vec<_>>())
         );
         assert_eq!(
-            horizontal_slice(&SLICE_TEST_1, 6)
-                .copied()
-                .collect::<Vec<_>>(),
-            horizontal_slice(&SLICE_TEST_1, 7)
-                .copied()
-                .collect::<Vec<_>>()
+            horizontal_slice(&SLICE_TEST_1, 6).map(|iter| iter.copied().collect::<Vec<_>>()),
+            horizontal_slice(&SLICE_TEST_1, 7).map(|iter| iter.copied().collect::<Vec<_>>())
         );
 
         for index in [0, 3, 6] {
             assert_eq!(
                 horizontal_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [1, 2, 3, 1, 2, 3, 1, 2, 3]
+                    .map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![1, 2, 3, 1, 2, 3, 1, 2, 3])
             );
         }
         for index in [1, 4, 7] {
             assert_eq!(
                 horizontal_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [4, 5, 6, 4, 5, 6, 4, 5, 6]
+                    .map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![4, 5, 6, 4, 5, 6, 4, 5, 6])
             );
         }
         for index in [2, 5, 8] {
             assert_eq!(
                 horizontal_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [7, 8, 9, 7, 8, 9, 7, 8, 9]
+                    .map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![7, 8, 9, 7, 8, 9, 7, 8, 9])
             );
         }
     }
 
     #[test]
-    #[should_panic]
     fn check_invalid_horizontal_slice() {
-        horizontal_slice(&SLICE_TEST_1, 9).for_each(drop);
+        assert!(horizontal_slice(&SLICE_TEST_1, 9).is_none());
     }
 
     #[test]
     fn check_vertical_slice() {
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 0)
-                .copied()
-                .collect::<Vec<_>>(),
-            [0, 0, 0, 3, 3, 3, 6, 6, 6]
+            vertical_slice(&SLICE_TEST_1, 0).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![0, 0, 0, 3, 3, 3, 6, 6, 6])
         );
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 4)
-                .copied()
-                .collect::<Vec<_>>(),
-            [1, 1, 1, 4, 4, 4, 7, 7, 7]
+            vertical_slice(&SLICE_TEST_1, 4).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![1, 1, 1, 4, 4, 4, 7, 7, 7])
         );
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 8)
-                .copied()
-                .collect::<Vec<_>>(),
-            [2, 2, 2, 5, 5, 5, 8, 8, 8]
+            vertical_slice(&SLICE_TEST_1, 8).map(|iter| iter.copied().collect::<Vec<_>>()),
+            Some(vec![2, 2, 2, 5, 5, 5, 8, 8, 8])
         );
 
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 1)
-                .copied()
-                .collect::<Vec<_>>(),
-            vertical_slice(&SLICE_TEST_1, 2)
-                .copied()
-                .collect::<Vec<_>>()
+            vertical_slice(&SLICE_TEST_1, 1).map(|iter| iter.copied().collect::<Vec<_>>()),
+            vertical_slice(&SLICE_TEST_1, 2).map(|iter| iter.copied().collect::<Vec<_>>()),
         );
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 3)
-                .copied()
-                .collect::<Vec<_>>(),
-            vertical_slice(&SLICE_TEST_1, 5)
-                .copied()
-                .collect::<Vec<_>>()
+            vertical_slice(&SLICE_TEST_1, 3).map(|iter| iter.copied().collect::<Vec<_>>()),
+            vertical_slice(&SLICE_TEST_1, 5).map(|iter| iter.copied().collect::<Vec<_>>()),
         );
         assert_eq!(
-            vertical_slice(&SLICE_TEST_1, 6)
-                .copied()
-                .collect::<Vec<_>>(),
-            vertical_slice(&SLICE_TEST_1, 7)
-                .copied()
-                .collect::<Vec<_>>()
+            vertical_slice(&SLICE_TEST_1, 6).map(|iter| iter.copied().collect::<Vec<_>>()),
+            vertical_slice(&SLICE_TEST_1, 7).map(|iter| iter.copied().collect::<Vec<_>>()),
         );
 
         for index in [0, 3, 6] {
             assert_eq!(
-                vertical_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [1, 4, 7, 1, 4, 7, 1, 4, 7]
+                vertical_slice(&SLICE_TEST_2, index).map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![1, 4, 7, 1, 4, 7, 1, 4, 7])
             );
         }
         for index in [1, 4, 7] {
             assert_eq!(
-                vertical_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [2, 5, 8, 2, 5, 8, 2, 5, 8]
+                vertical_slice(&SLICE_TEST_2, index).map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![2, 5, 8, 2, 5, 8, 2, 5, 8])
             );
         }
         for index in [2, 5, 8] {
             assert_eq!(
-                vertical_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [3, 6, 9, 3, 6, 9, 3, 6, 9]
+                vertical_slice(&SLICE_TEST_2, index).map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![3, 6, 9, 3, 6, 9, 3, 6, 9])
             );
         }
     }
 
     #[test]
-    #[should_panic]
     fn check_invalid_vertical_slice() {
-        vertical_slice(&SLICE_TEST_1, 9).for_each(drop);
+        assert!(vertical_slice(&SLICE_TEST_1, 9).is_none());
     }
 
     #[test]
     fn check_square_slice() {
         for index in 0..9 {
-            assert!(square_slice(&SLICE_TEST_1, index).all(|digit| *digit == index as u8));
+            let square_slice = square_slice(&SLICE_TEST_1, index);
+            assert!(square_slice.is_some());
+
+            if let Some(mut iter) = square_slice {
+                assert!(iter.all(|digit| *digit == index as u8));
+            }
         }
 
         for index in 0..9 {
             assert_eq!(
-                square_slice(&SLICE_TEST_2, index)
-                    .copied()
-                    .collect::<Vec<_>>(),
-                [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                square_slice(&SLICE_TEST_2, index).map(|iter| iter.copied().collect::<Vec<_>>()),
+                Some(vec![1, 2, 3, 4, 5, 6, 7, 8, 9])
             );
         }
     }
 
     #[test]
-    #[should_panic]
     fn check_invalid_square_slice() {
-        square_slice(&SLICE_TEST_1, 9).for_each(drop);
+        assert!(square_slice(&SLICE_TEST_1, 9).is_none());
     }
 
     #[test]
