@@ -5,9 +5,16 @@ pub type Grid = [[u8; 9]; 9];
 pub type Puzzle = Grid;
 pub type Solution = Grid;
 
+/// A plain array of 1..=9 digits, just for convenience.
 const DIGITS_ARRAY: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+/// A plain array of 0..=8 indexes into slices, puzzles (row, col), just for convenience.
 const INDICES_ARRAY: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+/// The number of random blanks to create when generating a puzzle.
 const TARGET_BLANKS_TO_GENERATE: usize = 35;
+
+/// The upper limit of random blanks that can be created.
 const MAX_BLANKS_TO_GENERATE: usize = 64;
 
 /// (row, col)
