@@ -32,7 +32,7 @@ pub fn solve(puzzle: Puzzle) -> Vec<Solution> {
     }
 
     let mut solutions = Vec::new();
-    find_solutions(puzzle, 0, &blanks, &DIGITS_ARRAY, &mut solutions);
+    find_solutions(puzzle, &blanks, &DIGITS_ARRAY, &mut solutions);
     solutions
 }
 
@@ -47,7 +47,7 @@ pub fn solve_any(puzzle: Puzzle) -> Option<Solution> {
         return Some(puzzle);
     }
 
-    find_solution(puzzle, 0, &blanks, &DIGITS_ARRAY)
+    find_solution(puzzle, &blanks, &DIGITS_ARRAY)
 }
 
 /// Generates a puzzle with an unique solution. The puzzle will be generally considered as
@@ -73,7 +73,7 @@ fn has_unique_solution(puzzle: Puzzle) -> bool {
     }
 
     let mut count_cache = 0;
-    count_solutions(puzzle, 0, &blanks, &DIGITS_ARRAY, &mut count_cache);
+    count_solutions(puzzle, &blanks, &DIGITS_ARRAY, &mut count_cache);
     count_cache == 1
 }
 
@@ -281,22 +281,15 @@ fn square_slice(puzzle: &Puzzle, square: usize) -> Option<impl Iterator<Item = &
 
 /// Finds a [Solution] to a [Puzzle] by backtracking.
 ///
-/// blank_index is the index into blanks, representing the next blank space to fill.
-///
 /// digits is the sequence of digits to use for searching. For all practical purposes, digits should
 /// contain all of 1..=9.
-fn find_solution(
-    mut puzzle: Puzzle,
-    blank_index: usize,
-    blanks: &[GridPos],
-    digits: &[u8; 9],
-) -> Option<Solution> {
-    if blank_index == blanks.len() {
+fn find_solution(mut puzzle: Puzzle, blanks: &[GridPos], digits: &[u8; 9]) -> Option<Solution> {
+    if blanks.is_empty() {
         // We have run out of blanks to fill, so this is a solution.
         return Some(puzzle);
     }
 
-    let (row, col) = blanks[blank_index];
+    let (row, col) = blanks[0];
 
     for digit in digits {
         puzzle[row][col] = *digit;
@@ -305,7 +298,7 @@ fn find_solution(
             continue;
         }
 
-        if let Some(solution) = find_solution(puzzle, blank_index + 1, blanks, digits) {
+        if let Some(solution) = find_solution(puzzle, &blanks[1..], digits) {
             return Some(solution);
         }
     }
@@ -317,25 +310,22 @@ fn find_solution(
 ///
 /// Returns the solutions in the variable. If no solution is found, the Vec will be empty.
 ///
-/// blank_index is the index into blanks, representing the next blank space to fill.
-///
 /// digits is the sequence of digits to use for searching. For all practical purposes, digits should
 /// contain all of 1..=9.
 fn find_solutions(
     mut puzzle: Puzzle,
-    blank_index: usize,
     blanks: &[GridPos],
     digits: &[u8; 9],
     solutions: &mut Vec<Solution>,
 ) {
-    if blank_index == blanks.len() {
+    if blanks.is_empty() {
         // We have run out of blanks to fill, so this is a solution.
         solutions.push(puzzle);
 
         return;
     }
 
-    let (row, col) = blanks[blank_index];
+    let (row, col) = blanks[0];
 
     for digit in digits {
         puzzle[row][col] = *digit;
@@ -344,7 +334,7 @@ fn find_solutions(
             continue;
         }
 
-        find_solutions(puzzle, blank_index + 1, blanks, digits, solutions);
+        find_solutions(puzzle, &blanks[1..], digits, solutions);
     }
 }
 
@@ -353,25 +343,17 @@ fn find_solutions(
 /// Returns the number of solutions (0, 1, or 2) in count_cache. If the puzzle has two or more
 /// solutions, count_cache will be 2.
 ///
-/// blank_index is the index into blanks, representing the next blank space to fill.
-///
 /// digits is the sequence of digits to use for searching. For all practical purposes, digits should
 /// contain all of 1..=9.
-fn count_solutions(
-    mut puzzle: Puzzle,
-    blank_index: usize,
-    blanks: &[GridPos],
-    digits: &[u8; 9],
-    count_cache: &mut u8,
-) {
-    if blank_index == blanks.len() {
+fn count_solutions(mut puzzle: Puzzle, blanks: &[GridPos], digits: &[u8; 9], count_cache: &mut u8) {
+    if blanks.is_empty() {
         // We have run out of blanks to fill, so this is a solution.
         *count_cache += 1;
 
         return;
     }
 
-    let (row, col) = blanks[blank_index];
+    let (row, col) = blanks[0];
 
     for digit in digits {
         puzzle[row][col] = *digit;
@@ -380,7 +362,7 @@ fn count_solutions(
             continue;
         }
 
-        count_solutions(puzzle, blank_index + 1, blanks, digits, count_cache);
+        count_solutions(puzzle, &blanks[1..], digits, count_cache);
         if *count_cache > 1 {
             return;
         }
@@ -400,7 +382,7 @@ fn create_random_solution() -> Solution {
         .collect();
 
     loop {
-        if let Some(solution) = find_solution(puzzle, 0, &blanks, &digits) {
+        if let Some(solution) = find_solution(puzzle, &blanks, &digits) {
             return solution;
         }
     }
