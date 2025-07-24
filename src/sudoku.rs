@@ -133,11 +133,7 @@ fn blanks(puzzle: Puzzle) -> Vec<GridPos> {
 
 /// Gets a view of a row in a [Puzzle].
 fn horizontal_slice(puzzle: &Puzzle, row: usize) -> Option<impl Iterator<Item = &u8>> {
-    if !(0..9).contains(&row) {
-        return None;
-    }
-
-    Some(puzzle[row].iter())
+    Some(puzzle.get(row)?.iter())
 }
 
 /// Gets a view of a col in a [Puzzle].
@@ -146,7 +142,7 @@ fn vertical_slice(puzzle: &Puzzle, col: usize) -> Option<impl Iterator<Item = &u
         return None;
     }
 
-    Some((0..9).map(move |row| &puzzle[row][col]))
+    Some(puzzle.iter().map(move |row| &row[col]))
 }
 
 /// Gets a view of a square in a [Puzzle].
